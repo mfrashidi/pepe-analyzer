@@ -22,7 +22,9 @@ type Transfer @entity(immutable: true) {
   from: Bytes! # address
   to: Bytes! # address
   value: BigInt! # uint256
+  outOfAll: BigDecimal!
   blockNumber: BigInt!
   blockTimestamp: BigInt!
+  isBeforePump: Boolean
   transactionHash: Bytes!
 }
