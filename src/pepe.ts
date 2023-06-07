@@ -1,9 +1,11 @@
 import {
   Approval as ApprovalEvent,
   OwnershipTransferred as OwnershipTransferredEvent,
-  Transfer as TransferEvent
+  Transfer as TransferEvent,
+  Pepe
 } from "../generated/Pepe/Pepe"
 import { Approval, OwnershipTransferred, Transfer } from "../generated/schema"
+import { BigInt, BigDecimal } from "@graphprotocol/graph-ts"
 
 export function handleApproval(event: ApprovalEvent): void {
   let entity = new Approval(
@@ -37,16 +39,21 @@ export function handleOwnershipTransferred(
 }
 
 export function handleTransfer(event: TransferEvent): void {
+  let pepe = Pepe.bind(event.address);
   let entity = new Transfer(
     event.transaction.hash.concatI32(event.logIndex.toI32())
   )
   entity.from = event.params.from
   entity.to = event.params.to
   entity.value = event.params.value
+  entity.outOfAll = BigDecimal.fromString(event.params.value.toString())
+                    .div(BigDecimal.fromString(pepe.totalSupply().toString())).truncate(4);
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
+
+  entity.isBeforePump = event.block.timestamp < BigInt.fromString("1682596800");
 
   entity.save()
 }
